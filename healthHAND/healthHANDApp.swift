@@ -9,9 +9,12 @@ import SwiftUI
 
 @main
 struct healthHANDApp: App {
+    @AppStorage("isDarkMode") private var isDarkMode = false
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            UserTypeSelectionView()
+                .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
 }
