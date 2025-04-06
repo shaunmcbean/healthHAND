@@ -4,7 +4,6 @@ import PhotosUI
 struct PatientDashboardView: View {
     @StateObject private var viewModel = AVSViewModel()
     @State private var showingDocumentUploader = false
-    @State private var showingSettings = false
     
     private var documentsList: some View {
         List {
@@ -12,15 +11,23 @@ struct PatientDashboardView: View {
                 NavigationLink {
                     DocumentDetailView(document: document)
                 } label: {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(document.clinicName)
-                            .font(.headline)
-                        Text(document.doctorName)
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text(document.uploadDate.formatted(date: .abbreviated, time: .shortened))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    HStack {
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text(document.clinicName)
+                                .font(.headline)
+                            Text(document.doctorName)
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Text(document.uploadDate.formatted(date: .abbreviated, time: .shortened))
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        
+                        Spacer()
+                        
+                        Image(systemName: document.isVerified ? "checkmark.seal.fill" : "xmark.seal.fill")
+                            .foregroundStyle(document.isVerified ? .green : .gray)
+                            .font(.title2)
                     }
                 }
                 .swipeActions(edge: .trailing, allowsFullSwipe: true) {
@@ -52,12 +59,6 @@ struct PatientDashboardView: View {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     HStack {
                         Button {
-                            showingSettings = true
-                        } label: {
-                            Image(systemName: "gear")
-                        }
-                        
-                        Button {
                             showingDocumentUploader = true
                         } label: {
                             Image(systemName: "plus")
@@ -68,9 +69,6 @@ struct PatientDashboardView: View {
             .sheet(isPresented: $showingDocumentUploader) {
                 DocumentUploaderView(viewModel: viewModel)
             }
-            .sheet(isPresented: $showingSettings) {
-                SettingsView()
-            }
         }
     }
 }
@@ -80,16 +78,28 @@ struct DocumentDetailView: View {
     
     var body: some View {
         ScrollView {
-            if let image = UIImage(contentsOfFile: document.documentURL.path) {
-                Image(uiImage: image)
-                    .resizable()
-                    .scaledToFit()
-            } else {
-                ContentUnavailableView(
-                    "Document Not Found",
-                    systemImage: "doc.text.fill",
-                    description: Text("The document file could not be loaded.")
-                )
+            VStack {
+                if let image = UIImage(contentsOfFile: document.documentURL.path) {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                } else {
+                    ContentUnavailableView(
+                        "Document Not Found",
+                        systemImage: "doc.text.fill",
+                        description: Text("The document file could not be loaded.")
+                    )
+                }
+                
+                HStack {
+                    Image(systemName: document.isVerified ? "checkmark.seal.fill" : "xmark.seal.fill")
+                        .foregroundStyle(document.isVerified ? .green : .gray)
+                        .font(.title)
+                    Text(document.isVerified ? "Verified" : "Not Verified")
+                        .font(.headline)
+                        .foregroundStyle(document.isVerified ? .green : .gray)
+                }
+                .padding()
             }
         }
         .navigationTitle(document.clinicName)

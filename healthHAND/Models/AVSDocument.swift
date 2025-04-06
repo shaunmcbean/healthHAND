@@ -4,19 +4,21 @@ struct AVSDocument: Identifiable, Codable {
     let id: UUID
     let clinicName: String
     let doctorName: String
-    let uploadDate: Date
     let fileName: String
-    
-    init(id: UUID = UUID(), clinicName: String, doctorName: String, uploadDate: Date = Date(), fileName: String) {
-        self.id = id
-        self.clinicName = clinicName
-        self.doctorName = doctorName
-        self.uploadDate = uploadDate
-        self.fileName = fileName
-    }
+    let uploadDate: Date
+    var isVerified: Bool
     
     var documentURL: URL {
         FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
             .appendingPathComponent(fileName)
+    }
+    
+    init(clinicName: String, doctorName: String, fileName: String) {
+        self.id = UUID()
+        self.clinicName = clinicName
+        self.doctorName = doctorName
+        self.fileName = fileName
+        self.uploadDate = Date()
+        self.isVerified = false // All new documents start as unverified
     }
 } 

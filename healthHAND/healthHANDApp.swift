@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import GoogleGenerativeAI
 
 @main
 struct healthHANDApp: App {
@@ -13,7 +14,7 @@ struct healthHANDApp: App {
     
     var body: some Scene {
         WindowGroup {
-            UserTypeSelectionView()
+            MainTabView()
                 .preferredColorScheme(isDarkMode ? .dark : .light)
         }
     }
