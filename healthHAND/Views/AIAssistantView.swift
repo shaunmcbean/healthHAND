@@ -8,18 +8,25 @@ import GoogleGenerativeAI
 //  Created by Etisha Garg on 03/05/24.
 //
 
-import SwiftUI
-import GoogleGenerativeAI
-
 struct AIAssistantView: View {
     @State private var userInput = ""
-    @State private var messages: [(isUser: Bool, text: LocalizedStringKey)] = []
+    @State private var messages: [(isUser: Bool, text: LocalizedStringKey)] = [
+        (isUser: false, text: "Hi, how can I help you today?")
+    ]
     @State private var isLoading = false
+    @State private var showError = false
+    @State private var errorMessage = ""
     private let model = GenerativeModel(name: "gemini-pro", apiKey: APIKey.default)
     
     var body: some View {
         NavigationStack {
             VStack {
+                Text("HiH Assistant")
+                    .font(.largeTitle)
+                    .fontWeight(.bold)
+                    .foregroundStyle(Color.accentColor)
+                    .padding(.top, 40)
+                
                 ScrollView {
                     LazyVStack(spacing: 12) {
                         ForEach(messages.indices, id: \.self) { index in
@@ -46,7 +53,8 @@ struct AIAssistantView: View {
                     } label: {
                         if isLoading {
                             ProgressView()
-                                .progressViewStyle(CircularProgressViewStyle())
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color.accentColor))
+                                .scaleEffect(1.2)
                         } else {
                             Image(systemName: "arrow.up.circle.fill")
                                 .font(.title)
@@ -57,9 +65,14 @@ struct AIAssistantView: View {
                 }
                 .padding()
             }
-            .navigationTitle("AI Assistant")
+            .navigationTitle("Assistant")
             .navigationBarTitleDisplayMode(.inline)
             .background(Color(.systemGroupedBackground))
+            .alert("Connection Error", isPresented: $showError) {
+                Button("OK", role: .cancel) { }
+            } message: {
+                Text(errorMessage)
+            }
         }
     }
     
@@ -74,13 +87,34 @@ struct AIAssistantView: View {
             if let text = response.text {
                 messages.append((isUser: false, text: LocalizedStringKey(text)))
             } else {
-                messages.append((isUser: false, text: "No response received from AI"))
+                showError(message: "No response received from the assistant")
+            }
+        } catch let error as NSError {
+            if error.domain == NSURLErrorDomain {
+                switch error.code {
+                case NSURLErrorNotConnectedToInternet:
+                    showError(message: "Please check your internet connection")
+                case NSURLErrorTimedOut:
+                    showError(message: "Request timed out. Please try again")
+                case NSURLErrorNetworkConnectionLost:
+                    showError(message: "Connection lost. Please try again")
+                default:
+                    showError(message: "Network error: \(error.localizedDescription)")
+                }
+            } else {
+                showError(message: "Error: \(error.localizedDescription)")
             }
         } catch {
-            messages.append((isUser: false, text: LocalizedStringKey("Error: \(error.localizedDescription)")))
+            showError(message: "An unexpected error occurred")
         }
         
         isLoading = false
+    }
+    
+    private func showError(message: String) {
+        errorMessage = message
+        showError = true
+        messages.append((isUser: false, text: LocalizedStringKey(message)))
     }
 }
 

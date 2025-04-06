@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import GoogleGenerativeAI
 
 @main
 struct healthHANDApp: App {

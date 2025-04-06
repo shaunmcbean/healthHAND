@@ -20,7 +20,7 @@ struct MainTabView: View {
             
             AIAssistantView()
                 .tabItem {
-                    Label("AI Assistant", systemImage: "brain.head.profile")
+                    Label("Assistant", systemImage: "brain.head.profile")
                 }
                 .tag(2)
             
